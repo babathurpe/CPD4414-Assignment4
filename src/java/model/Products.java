@@ -9,7 +9,7 @@ package model;
  *
  * @author Babathurpe
  */
-public class Product {
+public class Products {
     private int productId;
     private String name;
     private String description;
