@@ -82,5 +82,43 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        Set<String> keySet = request.getParameterMap().keySet();
+        try (PrintWriter out = response.getWriter()) {
+            if (keySet.contains("name") && keySet.contains("description") && keySet.contains("quantity")) {
+                // There are some parameters                
+                String name = request.getParameter("name");
+                String description = request.getParameter("description");
+                String quantity = request.getParameter("quantity");
+                int qty = Integer.parseInt(quantity);
+                doUpdate("INSERT INTO product (name, description, quantity) VALUES (?, ?, ?)", name, description, qty);
+            } else {
+                // There are no parameters at all
+                response.sendError(500, "Unsuccessful insert.");
+                //out.println("Error: Not enough data to input. Please use a URL in the form /product?name=XXX&description=XXX&quantity=#");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
+    
+    private int doUpdate(String query, String name, String desc, int qty) {
+        int numChanges = 0;
+        ArrayList params = new ArrayList();
+        params.add(name);
+        params.add(desc);
+        params.add(qty);
+        try (Connection conn = DbConnection.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            for (int i = 1; i <= params.size(); i++) {
+                pstmt.setString(i, params.get(i - 1).toString());
+            }
+            numChanges = pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return numChanges;
+    }
 }
