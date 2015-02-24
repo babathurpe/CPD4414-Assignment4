@@ -121,4 +121,31 @@ public class ProductServlet extends HttpServlet {
         }
         return numChanges;
     }
+    
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try (PrintWriter out = response.getWriter()) {
+            if (request.getParameterNames().hasMoreElements()) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                delete("DELETE FROM product WHERE productid = ?", id);
+            } else {
+                response.setStatus(500);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+
+    private int delete(String query, int qty) {
+        int numChanges = 0;
+        try (Connection conn = DbConnection.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, qty);
+            numChanges = pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return numChanges;
+    }
 }
