@@ -27,6 +27,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -121,8 +123,8 @@ public class ProductServlet {
 
     @POST
     //@Consumes("application/json")
-    public void doPost() throws SQLException {
-        JSONObject jsonData = new JSONObject();
+    public void doPost(String str) throws SQLException, ParseException {
+        JSONObject jsonData = (JSONObject) new JSONParser().parse(str);
         //int productid = (int) jsonData.get("id");
         String productName = (String) jsonData.get("name");
         String productDesc = (String) jsonData.get("description");
