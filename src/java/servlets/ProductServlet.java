@@ -6,7 +6,7 @@
 package servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,17 +15,26 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
  * @author Babathurpe
  */
-@WebServlet("/products")
-public class ProductServlet extends HttpServlet {
+//@WebServlet("/products")
+@Path("/products")
+public class ProductServlet {
 
     private String getResults(String query, String... params) {
         StringBuilder sb = new StringBuilder();
@@ -65,75 +74,46 @@ public class ProductServlet extends HttpServlet {
         return sb.toString();
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        response.setHeader("Content-Type", "text/plain-text");
-        try (PrintWriter out = response.getWriter()) {
-            if (!request.getParameterNames().hasMoreElements()) {
-                // There are no parameters at all
-                out.println(getResults("SELECT * FROM product"));
-            } else {
-                // There are some parameters
-                int id = Integer.parseInt(request.getParameter("id"));
-                out.println(getSingleResult("SELECT * FROM product WHERE productid = ?", String.valueOf(id)));
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    @GET
+    @Produces("application/json; charset=UTF-8")
+    //@Path("/{id}")
+    public String doGet() throws SQLException {        
+        JSONArray jsonArray = new JSONArray();
+        Connection conn = DbConnection.getConnection();
+        String query = "SELECT * FROM product";
+        PreparedStatement pstmt = conn.prepareStatement(query);
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        Set<String> keySet = request.getParameterMap().keySet();
-        try (PrintWriter out = response.getWriter()) {
-            if (keySet.contains("name") && keySet.contains("description") && keySet.contains("quantity")) {
-                // There are some parameters                
-                String name = request.getParameter("name");
-                String description = request.getParameter("description");
-                String quantity = request.getParameter("quantity");
-                int qty = Integer.parseInt(quantity);
-                doUpdate("INSERT INTO product (name, description, quantity) VALUES (?, ?, ?)", name, description, qty);
-            } else {
-                // There are no parameters at all
-                response.sendError(500, "Unsuccessful insert.");
-                //out.println("Error: Not enough data to input. Please use a URL in the form /product?name=XXX&description=XXX&quantity=#");
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            int total_columns = rs.getMetaData().getColumnCount();
+            JSONObject jsonData = new JSONObject();
+            for(int i = 0; i < total_columns; i++){
+                String columnName = rs.getMetaData().getColumnLabel(i+1).toLowerCase();
+                Object columnValue = rs.getObject(i+1);
+                jsonData.put(columnName, columnValue);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+            jsonArray.add(jsonData);
+
         }
+            return jsonArray.toJSONString();
     }
     
     
-    private int doUpdate(String query, String name, String desc, int qty) {
-        int numChanges = 0;
-        ArrayList params = new ArrayList();
-        params.add(name);
-        params.add(desc);
-        params.add(qty);
-        try (Connection conn = DbConnection.getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            for (int i = 1; i <= params.size(); i++) {
-                pstmt.setString(i, params.get(i - 1).toString());
-            }
-            numChanges = pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return numChanges;
+
+    @POST
+    @Consumes("application/json")
+     public void doPost(String str) {
+        JsonObject json = Json.createReader(new StringReader(str)).readObject();
+		System.out.println(json.toString());
     }
     
-    @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try (PrintWriter out = response.getWriter()) {
-            if (request.getParameterNames().hasMoreElements()) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                delete("DELETE FROM product WHERE productid = ?", id);
-            } else {
-                response.setStatus(500);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    
+    private int doUpdate() {
+        return 1;
+    }
+    
+    protected void doDelete() throws IOException {
+        
     }
     
 
@@ -149,7 +129,7 @@ public class ProductServlet extends HttpServlet {
         return numChanges;
     }
     
-    @Override
+    
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Set<String> keySet = request.getParameterMap().keySet();
         if (keySet.contains("name") && keySet.contains("description") && keySet.contains("quantity")) {
