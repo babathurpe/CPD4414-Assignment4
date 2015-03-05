@@ -76,7 +76,6 @@ public class ProductServlet {
 
     @GET
     @Produces("application/json; charset=UTF-8")
-    //@Path("/{id}")
     public String doGet() throws SQLException {
         JSONArray jsonArray = new JSONArray();
         Connection conn = DbConnection.getConnection();
