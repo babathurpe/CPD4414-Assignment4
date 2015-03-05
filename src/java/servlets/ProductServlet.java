@@ -120,14 +120,32 @@ public class ProductServlet {
     }
 
     @POST
-    @Consumes("application/json")
-    public void doPost(String str) {
-        JsonObject json = Json.createReader(new StringReader(str)).readObject();
-        System.out.println(json.toString());
+    //@Consumes("application/json")
+    public void doPost() throws SQLException {
+        JSONObject jsonData = new JSONObject();
+        //int productid = (int) jsonData.get("id");
+        String productName = (String) jsonData.get("name");
+        String productDesc = (String) jsonData.get("description");
+        int productQty = (int) jsonData.get("quantity");
+        doInsert("INSERT INTO product (name, description, quantity) VALUES (?, ?, ?)", productName, productDesc, productQty);
     }
 
-    private int doUpdate() {
-        return 1;
+    private int doInsert(String query, String name, String desc, int qty) {
+        int numChanges = 0;
+        ArrayList params = new ArrayList();
+        params.add(name);
+        params.add(desc);
+        params.add(qty);
+        try (Connection conn = DbConnection.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            for (int i = 1; i <= params.size(); i++) {
+                pstmt.setString(i, params.get(i - 1).toString());
+            }
+            numChanges = pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return numChanges;
     }
 
     protected void doDelete() throws IOException {
