@@ -49,7 +49,7 @@ public class ProductServlet {
                 //sb.append(String.format("%s\t%s\t%s\n", rs.getInt("productid"), rs.getString("name"), rs.getString("description"), rs.getInt("quantity")));
                 sb.append(String.format("{ \"ProductId\" : %d, \"name\": \"%s\", \"description\": \"%s\", \"quantity\": %d },\n", rs.getInt("productid"), rs.getString("name"), rs.getString("description"), rs.getInt("quantity")));
             }
-            sb.setLength(sb.length()-2);
+            sb.setLength(sb.length() - 2);
             sb.append("]");
         } catch (SQLException ex) {
             Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -77,7 +77,7 @@ public class ProductServlet {
     @GET
     @Produces("application/json; charset=UTF-8")
     //@Path("/{id}")
-    public String doGet() throws SQLException {        
+    public String doGet() throws SQLException {
         JSONArray jsonArray = new JSONArray();
         Connection conn = DbConnection.getConnection();
         String query = "SELECT * FROM product";
@@ -87,35 +87,53 @@ public class ProductServlet {
         while (rs.next()) {
             int total_columns = rs.getMetaData().getColumnCount();
             JSONObject jsonData = new JSONObject();
-            for(int i = 0; i < total_columns; i++){
-                String columnName = rs.getMetaData().getColumnLabel(i+1).toLowerCase();
-                Object columnValue = rs.getObject(i+1);
+            for (int i = 0; i < total_columns; i++) {
+                String columnName = rs.getMetaData().getColumnLabel(i + 1).toLowerCase();
+                Object columnValue = rs.getObject(i + 1);
                 jsonData.put(columnName, columnValue);
             }
             jsonArray.add(jsonData);
 
         }
-            return jsonArray.toJSONString();
+        return jsonArray.toJSONString();
     }
-    
-    
+
+    @GET
+    @Produces("application/json; charset=UTF-8")
+    @Path("{productid}")
+    public String doGet(@PathParam("productid") int id) throws SQLException {
+        JSONObject jsonData = new JSONObject();
+        Connection conn = DbConnection.getConnection();
+        String query = "SELECT * FROM product where productid =" + id;
+        PreparedStatement pstmt = conn.prepareStatement(query);
+
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            int total_columns = rs.getMetaData().getColumnCount();
+            
+            for (int i = 0; i < total_columns; i++) {
+                String columnName = rs.getMetaData().getColumnLabel(i + 1).toLowerCase();
+                Object columnValue = rs.getObject(i + 1);
+                jsonData.put(columnName, columnValue);
+            }
+        }
+        return jsonData.toJSONString();
+    }
 
     @POST
     @Consumes("application/json")
-     public void doPost(String str) {
+    public void doPost(String str) {
         JsonObject json = Json.createReader(new StringReader(str)).readObject();
-		System.out.println(json.toString());
+        System.out.println(json.toString());
     }
-    
-    
+
     private int doUpdate() {
         return 1;
     }
-    
+
     protected void doDelete() throws IOException {
-        
+
     }
-    
 
     private int delete(String query, int id) {
         int numChanges = 0;
@@ -128,24 +146,23 @@ public class ProductServlet {
         }
         return numChanges;
     }
-    
-    
+
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Set<String> keySet = request.getParameterMap().keySet();
         if (keySet.contains("name") && keySet.contains("description") && keySet.contains("quantity")) {
-                // There are some parameters                
-                String name = request.getParameter("name");
-                String description = request.getParameter("description");
-                String quantity = request.getParameter("quantity");
-                int qty = Integer.parseInt(quantity);
+            // There are some parameters                
+            String name = request.getParameter("name");
+            String description = request.getParameter("description");
+            String quantity = request.getParameter("quantity");
+            int qty = Integer.parseInt(quantity);
             int id = Integer.parseInt(request.getParameter("id"));
             update("UPDATE product SET name = ?, description = ?, quantity = ? WHERE productid = ?", name, description, qty, id);
         } else {
             response.setStatus(500);
         }
     }
-    
-    private int update(String query,String name, String desc, int qty,int id) {
+
+    private int update(String query, String name, String desc, int qty, int id) {
         int numChanges = 0;
         ArrayList params = new ArrayList();
         params.add(name);
