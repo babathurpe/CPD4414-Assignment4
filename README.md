@@ -1,6 +1,8 @@
-# CPD4414-Assignment3
+# CPD4414-Assignment4
 
-###Servlets with Java
+###Web Services with Java
+Returns JSON representation of data using simple Json library
+
 ####doGet Method (get all rows from database)
 * Returns a JSON data representation of the table
 
