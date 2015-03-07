@@ -124,11 +124,12 @@ public class ProductServlet {
         //int productid = (int) jsonData.get("id");
         String productName = (String) jsonData.get("name");
         String productDesc = (String) jsonData.get("description");
-        int productQty = (int) jsonData.get("quantity");
+        long productQty = (long) jsonData.get("quantity");
+        //System.out.println(productName + "\n" + productDesc + "\n" + productQty);
         doInsert("INSERT INTO product (name, description, quantity) VALUES (?, ?, ?)", productName, productDesc, productQty);
     }
 
-    private int doInsert(String query, String name, String desc, int qty) {
+    private int doInsert(String query, String name, String desc, long qty) {
         int numChanges = 0;
         ArrayList params = new ArrayList();
         params.add(name);
