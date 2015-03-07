@@ -1,7 +1,7 @@
 # CPD4414-Assignment4
 
 ###Web Services with Java
-Returns JSON representation of data using simple Json library
+Returns JSON representation of data using simple JSON library
 
 #####doGet Method (get all rows from database)
 * Returns a JSON data representation of the table
