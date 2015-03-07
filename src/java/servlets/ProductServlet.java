@@ -11,13 +11,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -118,7 +117,6 @@ public class ProductServlet {
     }
 
     @POST
-    //@Consumes("application/json")
     public void doPost(String str) throws SQLException, ParseException {
         JSONObject jsonData = (JSONObject) new JSONParser().parse(str);
         //int productid = (int) jsonData.get("id");
@@ -147,8 +145,10 @@ public class ProductServlet {
         return numChanges;
     }
 
-    protected void doDelete() throws IOException {
-
+    @DELETE
+    @Path("{productid}")
+    public void doDelete() throws IOException {
+        
     }
 
     private int delete(String query, int id) {
@@ -163,22 +163,18 @@ public class ProductServlet {
         return numChanges;
     }
 
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Set<String> keySet = request.getParameterMap().keySet();
-        if (keySet.contains("name") && keySet.contains("description") && keySet.contains("quantity")) {
-            // There are some parameters                
-            String name = request.getParameter("name");
-            String description = request.getParameter("description");
-            String quantity = request.getParameter("quantity");
-            int qty = Integer.parseInt(quantity);
-            int id = Integer.parseInt(request.getParameter("id"));
-            update("UPDATE product SET name = ?, description = ?, quantity = ? WHERE productid = ?", name, description, qty, id);
-        } else {
-            response.setStatus(500);
-        }
+    @PUT
+    public void doPut(String str) throws SQLException, ParseException {
+        JSONObject jsonData = (JSONObject) new JSONParser().parse(str);
+        long productid = (long) jsonData.get("id");
+        String productName = (String) jsonData.get("name");
+        String productDesc = (String) jsonData.get("description");
+        long productQty = (long) jsonData.get("quantity");
+        //System.out.println(productName + "\n" + productDesc + "\n" + productQty);
+        Update("UPDATE product SET name = ?, description = ?, quantity = ? WHERE productid = ?", productName, productDesc, productQty, productid);
     }
 
-    private int update(String query, String name, String desc, int qty, int id) {
+    private int Update(String query, String name, String desc, long qty, long id) {
         int numChanges = 0;
         ArrayList params = new ArrayList();
         params.add(name);
