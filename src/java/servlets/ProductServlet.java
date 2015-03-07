@@ -179,7 +179,7 @@ public class ProductServlet {
         Connection conn = DbConnection.getConnection();
         String query = "UPDATE product SET name =\'"+ productName +"\', description =\'" + productDesc + "\', quantity =" + productQty + " WHERE productid =" + id;
         PreparedStatement pstmt = conn.prepareStatement(query);
-        pstmt.execute();
+        pstmt.executeUpdate();
        }
 
     private int Update(String query, String name, String desc, long qty, long id) {
