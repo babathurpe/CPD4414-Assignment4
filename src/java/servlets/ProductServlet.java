@@ -117,6 +117,7 @@ public class ProductServlet {
     }
 
     @POST
+    @Path("{productid}")
     public void doPost(String str) throws SQLException, ParseException {
         JSONObject jsonData = (JSONObject) new JSONParser().parse(str);
         //int productid = (int) jsonData.get("id");
@@ -147,32 +148,39 @@ public class ProductServlet {
 
     @DELETE
     @Path("{productid}")
-    public void doDelete() throws IOException {
-        
+    public void doDelete(@PathParam("productid") int id) throws IOException, SQLException {
+        Connection conn = DbConnection.getConnection();
+        String query = "DELETE FROM product where productid =" + id;
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.execute();
     }
 
     private int delete(String query, int id) {
         int numChanges = 0;
         try (Connection conn = DbConnection.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setInt(1, id);
+            pstmt.setLong(1, id);
             numChanges = pstmt.executeUpdate();
         } catch (SQLException ex) {
+            System.out.println(ex);
             Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         return numChanges;
     }
 
     @PUT
-    public void doPut(String str) throws SQLException, ParseException {
+    @Path("{productid}")
+    public void doPut(@PathParam("productid") int id, String str) throws SQLException, ParseException {
         JSONObject jsonData = (JSONObject) new JSONParser().parse(str);
-        long productid = (long) jsonData.get("id");
+        //long productid = (long) jsonData.get("id");
         String productName = (String) jsonData.get("name");
         String productDesc = (String) jsonData.get("description");
         long productQty = (long) jsonData.get("quantity");
-        //System.out.println(productName + "\n" + productDesc + "\n" + productQty);
-        Update("UPDATE product SET name = ?, description = ?, quantity = ? WHERE productid = ?", productName, productDesc, productQty, productid);
-    }
+        Connection conn = DbConnection.getConnection();
+        String query = "UPDATE product SET name =\'"+ productName +"\', description =\'" + productDesc + "\', quantity =" + productQty + " WHERE productid =" + id;
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.execute();
+       }
 
     private int Update(String query, String name, String desc, long qty, long id) {
         int numChanges = 0;
