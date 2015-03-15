@@ -35,9 +35,9 @@ import org.json.simple.parser.ParseException;
 //@WebServlet("/products")
 @Path("/products")
 public class ProductServlet {
-    
+
     private JsonObject jsonData;
-    
+
     @GET
     @Produces("application/json; charset=UTF-8")
     public String doGet() throws SQLException {
@@ -46,18 +46,17 @@ public class ProductServlet {
         Connection conn = DbConnection.getConnection();
         String query = "SELECT * FROM product";
         PreparedStatement pstmt = conn.prepareStatement(query);
-
+        
         ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                    JsonObjectBuilder productBuilder = Json.createObjectBuilder();
-                    productBuilder.add("productId", rs.getInt("productid"))
-                            .add("name", rs.getString("name"))
-                            .add("description", rs.getString("description"))
-                            .add("quantity", rs.getInt("quantity"));
-                    productsList.add(productBuilder);
-                }
-            return productsList.build().toString();
+        while (rs.next()) {
+            JsonObjectBuilder productBuilder = Json.createObjectBuilder();
+            productBuilder.add("productId", rs.getInt("productid"))
+                    .add("name", rs.getString("name"))
+                    .add("description", rs.getString("description"))
+                    .add("quantity", rs.getInt("quantity"));
+            productsList.add(productBuilder);
+        }
+        return productsList.build().toString();
     }
 
     @GET
@@ -71,11 +70,11 @@ public class ProductServlet {
         ResultSet rs = pstmt.executeQuery();
         while (rs.next()) {
             jsonData = Json.createObjectBuilder()
-                            .add("productId", rs.getInt("productid"))
-                            .add("name", rs.getString("name"))
-                            .add("description", rs.getString("description"))
-                            .add("quantity", rs.getInt("quantity"))
-                            .build();
+                    .add("productId", rs.getInt("productid"))
+                    .add("name", rs.getString("name"))
+                    .add("description", rs.getString("description"))
+                    .add("quantity", rs.getInt("quantity"))
+                    .build();
         }
         return jsonData.toString();
     }
@@ -139,10 +138,10 @@ public class ProductServlet {
         String productDesc = (String) jsonPutData.get("description");
         long productQty = (long) jsonPutData.get("quantity");
         Connection conn = DbConnection.getConnection();
-        String query = "UPDATE product SET name =\'"+ productName +"\', description =\'" + productDesc + "\', quantity =" + productQty + " WHERE productid =" + id;
+        String query = "UPDATE product SET name =\'" + productName + "\', description =\'" + productDesc + "\', quantity =" + productQty + " WHERE productid =" + id;
         PreparedStatement pstmt = conn.prepareStatement(query);
         pstmt.executeUpdate();
-       }
+    }
 
     private int Update(String query, String name, String desc, long qty, long id) {
         int numChanges = 0;
