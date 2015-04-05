@@ -62,7 +62,7 @@ public class ProductList {
     }
     
     public void set(int productId, Products product) throws Exception {
-        int result = doUpdate("UPDATE products SET name = ?, description = ?, quantity = ? WHERE productid = ?",
+        int result = doUpdate("UPDATE product SET name = ?, description = ?, quantity = ? WHERE productid = ?",
                 product.getName(),
                 product.getDescription(),
                 String.valueOf(product.getQuantity()),
@@ -83,7 +83,7 @@ public class ProductList {
     }
 
     public void remove(int productId) throws Exception {
-        int result = doUpdate("DELETE FROM products WHERE productid = ?",
+        int result = doUpdate("DELETE FROM product WHERE productid = ?",
                 String.valueOf(productId));
         if (result > 0) {
             Products product = get(productId);
@@ -94,7 +94,7 @@ public class ProductList {
     }
     
     public void add(Products newProduct) throws Exception {
-        int result = doUpdate("INSERT INTO  products (productid, name, description, quantity) VALUES (?,?,?,?)",
+        int result = doUpdate("INSERT INTO  product (productid, name, description, quantity) VALUES (?,?,?,?)",
                 String.valueOf(newProduct.getProductId()),
                 newProduct.getName(),
                 newProduct.getDescription(),
