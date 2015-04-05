@@ -19,7 +19,7 @@ public class Products {
     private int quantity;
     
      public Products(){
-         
+         //empty constructor
      }
 
     //Constructor of Products via form input

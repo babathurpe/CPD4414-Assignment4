@@ -34,18 +34,16 @@ public class ProductServlet {
     @Inject
     ProductList productList;
 
-    private JsonObject jsonData;
-
     @GET
     @Produces("application/json; charset=UTF-8")
-    public Response doGet() throws SQLException {
+    public Response getAll() throws SQLException {
         return Response.ok(productList.toJson()).build();
     }
 
     @GET
     @Produces("application/json; charset=UTF-8")
     @Path("{productid}")
-    public Response doGet(@PathParam("productid") int id) throws SQLException {
+    public Response getById(@PathParam("productid") int id) throws SQLException {
         return Response.ok(productList.get(id).toJson()).build();
     }
 
