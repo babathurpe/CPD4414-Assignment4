@@ -25,7 +25,6 @@ import servlets.ProductServlet;
  *
  * @author Babathurpe
  */
-@Singleton
 @ApplicationScoped
 public class ProductList {
 
@@ -34,12 +33,12 @@ public class ProductList {
     public ProductList() {
         productList = new ArrayList<>();
         try (Connection connection = DbConnection.getConnection()) {
-            String query = "SELECT * FROM products";
+            String query = "SELECT * FROM product";
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 Products product = new Products(
-                        rs.getInt("product_id"),
+                        rs.getInt("productid"),
                         rs.getString("name"),
                         rs.getString("description"),
                         rs.getInt("quantity"));
