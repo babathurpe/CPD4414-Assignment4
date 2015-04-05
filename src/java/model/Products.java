@@ -30,6 +30,14 @@ public class Products {
         this.quantity = quantity;
     }
     
+    //Constructor of Products via JSON input
+     public Products(JsonObject json){
+        productId = json.getInt("productId");
+        name = json.getString("name");
+        description = json.getString("description");
+        quantity = json.getInt("quantity");
+    }
+     
     //Constructor JSON format of Products
     public JsonObject toJson(){
         return Json.createObjectBuilder()

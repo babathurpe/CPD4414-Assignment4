@@ -49,12 +49,83 @@ public class ProductList {
             Logger.getLogger(ProductList.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public Products get(int productId) {
+        Products products = null;
+        for (int i = 0; i < productList.size() && products == null; i++) {
+            Products p = productList.get(i);
+            if (p.getProductId() == productId) {
+                products = p;
+            }
+        }
+        return products;
+    }
     
-    public JsonArray toJson(){
+    public void set(int productId, Products product) throws Exception {
+        int result = doUpdate("UPDATE products SET name = ?, description = ?, quantity = ? WHERE productid = ?",
+                product.getName(),
+                product.getDescription(),
+                String.valueOf(product.getQuantity()),
+                String.valueOf(productId)
+        );
+        if(result == 1){
+            Products products = get(productId);
+            products.setName(product.getName());
+            products.setDescription(product.getDescription());
+            products.setQuantity(product.getQuantity());
+        } else{
+            throw new Exception("Cannot Update Products.");
+        }
+    }
+    
+    public void remove(Products p) throws Exception {
+        remove(p.getProductId());
+    }
+
+    public void remove(int productId) throws Exception {
+        int result = doUpdate("DELETE FROM products WHERE productid = ?",
+                String.valueOf(productId));
+        if (result > 0) {
+            Products product = get(productId);
+            productList.remove(product);
+        } else {
+            throw new Exception("Delete failed");
+        }
+    }
+    
+    public void add(Products newProduct) throws Exception {
+        int result = doUpdate("INSERT INTO  Product (productid, name, description, quantity) VALUES (?,?,?,?)",
+                String.valueOf(newProduct.getProductId()),
+                newProduct.getName(),
+                newProduct.getDescription(),
+                String.valueOf(newProduct.getQuantity()));
+        if (result > 0) {
+            productList.add(newProduct);
+        } else {
+            throw new Exception("Cannot add product.");
+        }
+    }
+    
+
+    public JsonArray toJson() {
         JsonArrayBuilder jsonProduct = Json.createArrayBuilder();
-        for (Products p : productList){
+        for (Products p : productList) {
             jsonProduct.add(p.toJson());
         }
         return jsonProduct.build();
+    }
+
+    private int doUpdate(String query, String... params) {
+        int numChanges = 0;
+        try (Connection conn = DbConnection.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            for (int i = 1; i <= params.length; i++) {
+                pstmt.setString(i, params[i - 1]);
+            }
+            numChanges = pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductList.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return numChanges;
     }
 }

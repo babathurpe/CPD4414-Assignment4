@@ -6,15 +6,11 @@
 package servlets;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -24,9 +20,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import model.ProductList;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import model.Products;
 
 /**
  *
@@ -39,7 +33,7 @@ public class ProductServlet {
 
     @Inject
     ProductList productList;
-    
+
     private JsonObject jsonData;
 
     @GET
@@ -52,89 +46,46 @@ public class ProductServlet {
     @Produces("application/json; charset=UTF-8")
     @Path("{productid}")
     public Response doGet(@PathParam("productid") int id) throws SQLException {
-        
-        return Response.ok().build();
+        return Response.ok(productList.get(id).toJson()).build();
     }
 
     @POST
-    @Path("{productid}")
-    public void doPost(String str) throws SQLException, ParseException {
-        JSONObject jsonPostData = (JSONObject) new JSONParser().parse(str);
-        String productName = (String) jsonPostData.get("name");
-        String productDesc = (String) jsonPostData.get("description");
-        long productQty = (long) jsonPostData.get("quantity");
-        doInsert("INSERT INTO product (name, description, quantity) VALUES (?, ?, ?)", productName, productDesc, productQty);
-    }
-
-    private int doInsert(String query, String name, String desc, long qty) {
-        int numChanges = 0;
-        ArrayList params = new ArrayList();
-        params.add(name);
-        params.add(desc);
-        params.add(qty);
-        try (Connection conn = DbConnection.getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            for (int i = 1; i <= params.size(); i++) {
-                pstmt.setString(i, params.get(i - 1).toString());
-            }
-            numChanges = pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+    @Consumes("application/json")
+    public Response add(JsonObject json) {
+        Response response;
+        try {
+            productList.add(new Products(json));
+            response = Response.ok().build();
+        } catch (Exception ex) {
+            response = Response.status(500).build();
         }
-        return numChanges;
+        return response;
     }
 
     @DELETE
     @Path("{productid}")
-    public void doDelete(@PathParam("productid") int id) throws IOException, SQLException {
-        Connection conn = DbConnection.getConnection();
-        String query = "DELETE FROM product where productid =" + id;
-        PreparedStatement pstmt = conn.prepareStatement(query);
-        pstmt.execute();
-    }
-
-    private int delete(String query, int id) {
-        int numChanges = 0;
-        try (Connection conn = DbConnection.getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setLong(1, id);
-            numChanges = pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            System.out.println(ex);
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+    public Response delete(@PathParam("productid") int id) throws IOException, SQLException {
+        Response response;
+        try {
+            productList.remove(id);
+            response = Response.ok().build();
+        } catch (Exception ex) {
+            response = Response.status(500).build();
         }
-        return numChanges;
+        return response;
     }
 
     @PUT
     @Path("{productid}")
-    public void doPut(@PathParam("productid") int id, String str) throws SQLException, ParseException {
-        JSONObject jsonPutData = (JSONObject) new JSONParser().parse(str);
-        //long productid = (long) jsonPostData.get("id");
-        String productName = (String) jsonPutData.get("name");
-        String productDesc = (String) jsonPutData.get("description");
-        long productQty = (long) jsonPutData.get("quantity");
-        Connection conn = DbConnection.getConnection();
-        String query = "UPDATE product SET name =\'" + productName + "\', description =\'" + productDesc + "\', quantity =" + productQty + " WHERE productid =" + id;
-        PreparedStatement pstmt = conn.prepareStatement(query);
-        pstmt.executeUpdate();
-    }
-
-    private int Update(String query, String name, String desc, long qty, long id) {
-        int numChanges = 0;
-        ArrayList params = new ArrayList();
-        params.add(name);
-        params.add(desc);
-        params.add(qty);
-        try (Connection conn = DbConnection.getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            for (int i = 1; i <= params.size(); i++) {
-                pstmt.setString(i, params.get(i - 1).toString());
-            }
-            numChanges = pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+    public Response set(@PathParam("productid") int id, JsonObject json) {
+        Response response;
+        try {
+            Products p = new Products(json);
+            productList.set(id, p);
+            response = Response.ok().build();
+        } catch (Exception ex) {
+            response = Response.status(500).build();
         }
-        return numChanges;
+        return response;
     }
 }
