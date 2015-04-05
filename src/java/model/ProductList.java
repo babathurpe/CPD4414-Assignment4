@@ -94,7 +94,7 @@ public class ProductList {
     }
     
     public void add(Products newProduct) throws Exception {
-        int result = doUpdate("INSERT INTO  Product (productid, name, description, quantity) VALUES (?,?,?,?)",
+        int result = doUpdate("INSERT INTO  products (productid, name, description, quantity) VALUES (?,?,?,?)",
                 String.valueOf(newProduct.getProductId()),
                 newProduct.getName(),
                 newProduct.getDescription(),
