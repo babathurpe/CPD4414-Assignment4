@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -24,6 +25,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import model.ProductList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -36,47 +39,23 @@ import org.json.simple.parser.ParseException;
 @Path("/products")
 public class ProductServlet {
 
+    @Inject
+    ProductList productList;
+    
     private JsonObject jsonData;
 
     @GET
     @Produces("application/json; charset=UTF-8")
-    public String doGet() throws SQLException {
-        //JSONArray jsonArray = new JSONArray();
-        JsonArrayBuilder productsList = Json.createArrayBuilder();
-        Connection conn = DbConnection.getConnection();
-        String query = "SELECT * FROM product";
-        PreparedStatement pstmt = conn.prepareStatement(query);
-        
-        ResultSet rs = pstmt.executeQuery();
-        while (rs.next()) {
-            JsonObjectBuilder productBuilder = Json.createObjectBuilder();
-            productBuilder.add("productId", rs.getInt("productid"))
-                    .add("name", rs.getString("name"))
-                    .add("description", rs.getString("description"))
-                    .add("quantity", rs.getInt("quantity"));
-            productsList.add(productBuilder);
-        }
-        return productsList.build().toString();
+    public Response doGet() throws SQLException {
+        return Response.ok(productList.toJson()).build();
     }
 
     @GET
     @Produces("application/json; charset=UTF-8")
     @Path("{productid}")
-    public String doGet(@PathParam("productid") int id) throws SQLException {
-        Connection conn = DbConnection.getConnection();
-        String query = "SELECT * FROM product where productid =" + id;
-        PreparedStatement pstmt = conn.prepareStatement(query);
-
-        ResultSet rs = pstmt.executeQuery();
-        while (rs.next()) {
-            jsonData = Json.createObjectBuilder()
-                    .add("productId", rs.getInt("productid"))
-                    .add("name", rs.getString("name"))
-                    .add("description", rs.getString("description"))
-                    .add("quantity", rs.getInt("quantity"))
-                    .build();
-        }
-        return jsonData.toString();
+    public Response doGet(@PathParam("productid") int id) throws SQLException {
+        
+        return Response.ok().build();
     }
 
     @POST

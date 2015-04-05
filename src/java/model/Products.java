@@ -5,6 +5,9 @@
  */
 package model;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+
 /**
  *
  * @author Babathurpe
@@ -14,12 +17,27 @@ public class Products {
     private String name;
     private String description;
     private int quantity;
+    
+     public Products(){
+         
+     }
 
+    //Constructor of Products via form input
     public Products(int productId, String name, String description, int quantity) {
         this.productId = productId;
         this.name = name;
         this.description = description;
         this.quantity = quantity;
+    }
+    
+    //Constructor JSON format of Products
+    public JsonObject toJson(){
+        return Json.createObjectBuilder()
+                .add("productId", productId)
+                .add("name", name)
+                .add("description", description)
+                .add("quantity", quantity)
+                .build();
     }
 
     public int getProductId() {
