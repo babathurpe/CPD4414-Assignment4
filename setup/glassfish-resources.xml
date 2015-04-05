@@ -16,4 +16,9 @@
     <property name="User" value="root"/>
     <property name="Password" value=""/>
   </jdbc-connection-pool>
+    <admin-object-resource enabled="true" jndi-name="jms/hello"  res-type="javax.jms.Queue"  res-adapter="jmsra">
+        <property name="Name" value="PhysicalQueue"/>
+    </admin-object-resource>
+    <connector-connection-pool name="jms/helloFactoryPool"  connection-definition-name="javax.jms.QueueConnectionFactory"  resource-adapter-name="jmsra"/>
+    <connector-resource enabled="true" jndi-name="jms/helloFactory" pool-name="jms/helloFactoryPool"  />
 </resources>
